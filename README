@@ -1,0 +1,57 @@
+
+  xcodebuild -project WebDriverAgent.xcodeproj \
+  -scheme WebDriverAgentRunner \
+  -destination 'id=00008020-00063C
+  test -allowProvisioningUpdates
+
+curl -X POST http://127.0.0.1:4723/wd/hub/session \
+-H "Content-Type: application/json" \
+-d '{
+  "capabilities": {
+    "alwaysMatch": {
+      "platformName": "iOS",
+      "appium:deviceName": "iPhone XS",
+      "appium:udid": "00008020-00063C841142002E",
+      "appium:automationName": "XCUITest",
+      "appium:bundleId": "com.binh.test",
+      "appium:noReset": true
+    },
+    "firstMatch": [{}]
+  }
+}'841142002E' \
+
+
+
+  xcodebuild -project WebDriverAgent.xcodeproj \
+  -scheme WebDriverAgentRunner \
+  -destination 'id=00008030-00123432267B402E' \
+  test -allowProvisioningUpdates
+
+
+
+
+
+
+appium server -p 4723 --log-level debug --allow-cors    --base-path /wd/hub --address 127.0.0.1 --allow-insecure=chromedriver_autodownload
+
+appium server \
+  -p 4723 \
+  --log-level debug \
+  --allow-cors \
+  --base-path /wd/hub \
+  --address 127.0.0.1 \
+  --allow-insecure="*:chromedriver_autodownload"
+
+
+  ANDROID_HOME=$HOME/Library/Android/sdk appium server \
+  -p 4723 \
+  --log-level debug \
+  --allow-cors \
+  --base-path /wd/hub \
+  --address 127.0.0.1 \
+  --allow-insecure="*:chromedriver_autodownload"
+
+
+appium driver install xcuitest
+
+4️⃣ Tích chọn "Show this iPhone when on Wi-Fi"
