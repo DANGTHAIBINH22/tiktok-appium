@@ -1,12 +1,46 @@
 import { remote } from 'webdriverio';
-import { getEmailTempIOExist, getMessageTempIO, getTiktokCodeTempIO, getCodeTiktok} from "./helper.js"
-async function init({ driver }) {
+import { getEmailTempIOExist, getMessageTempIO, getTiktokCodeTempIO, getCodeTiktok, getEmailTempIO, updateAccountToServer } from "./helper.js"
+async function init({ driver, email, cookie }) {
   let agree;
   let continueBtn = await findButton({ driver, text: 'Continue' });
-  await driver.pause(3000);
+  await driver.pause(7000);
 
   agree = await findButton({ driver, text: 'Agree and continue' });
   await driver.pause(5000);
+  let [temp, domain] = email.split("@");
+  let email_hint = temp[0] + "***" + temp[temp.length - 1] + "@" + domain;
+  let is_code = await findButton({ driver, text: email_hint });
+
+
+  if (is_code) {
+    await driver.pause(5000);
+    agree = await findButton({ driver, text: 'Next' });
+    await driver.pause(5000);
+    let code = await getCodeTiktok({ cookie });
+    console.log("Mã tiktok nhận được: ", code);
+    await driver.pause(3000);
+    agree = await findButton({ driver, xpath: '//android.view.View[@resource-id="root"]/android.view.View[2]/android.view.View/android.view.View[1]' });
+    const mapping = {
+      '0': 7,
+      '1': 8,
+      '2': 9,
+      '3': 10,
+      '4': 11,
+      '5': 12,
+      '6': 13,
+      '7': 14,
+      '8': 15,
+      '9': 16
+    };
+
+    for (let i = 0; i < code.length; i++) {
+      await driver.pressKeyCode(mapping[code[i]]); // 6
+      console.log("Đã nhập số: ", mapping[code[i]]);
+      await driver.pause(1000);
+    }
+
+
+  }
 
   agree = await findButton({ driver, text: 'Allow' });
   await driver.pause(5000);
@@ -44,33 +78,7 @@ async function init({ driver }) {
 }
 async function handleChangePassword({ driver, password, cookie, email }) {
 
-  await driver.pause(3000);
-  let agree = await findButton({ driver, text: 'Profile' });
-  await driver.pause(3000);
-  await findButton({ driver, text: '', xpath: '//android.widget.ImageView[@content-desc="Lock"]' });
-  //tab giữa màn hình
-  await driver.performActions([{
-    type: 'pointer',
-    id: 'finger1',
-    parameters: { pointerType: 'touch' },
-    actions: [
-      { type: 'pointerMove', duration: 0, x: 540, y: 1200 },
-      { type: 'pointerDown', button: 0 },
-      { type: 'pause', duration: 100 },
-      { type: 'pointerUp', button: 0 }
-    ]
-  }]);
-  await driver.pause(3000);
-  agree = await findButton({ driver, text: '', xpath: '//android.widget.Button[@content-desc="Profile menu"]' });
-
-
-  await driver.pause(7000);
-
-  agree = await findButton({ driver, text: 'Settings and privacy' });
-
-  await driver.pause(5000);
-
-  agree = await findButton({ driver, text: 'Account', index: 1 });
+ 
 
   await driver.pause(5000);
 
@@ -83,28 +91,56 @@ async function handleChangePassword({ driver, password, cookie, email }) {
 
   await driver.pause(5000);
 
-  agree = await findButton({ driver, text: 'Continue' });
+  let is_continue = await findButton({ driver, text: 'Continue' });
 
   await driver.pause(5000);
-  let [ temp, domain ] =  email.split("@");
-  let email_hint = temp[0]+ "***"+temp[temp.length - 1] + "@" + domain;
-  let  is_code = await findButton({ driver, text: email_hint});
+  let [temp, domain] = email.split("@");
+  let email_hint = temp[0] + "***" + temp[temp.length - 1] + "@" + domain;
+  let is_code = await findButton({ driver, text: email_hint });
 
-  
+  let code = ""
   if (is_code) {
     await driver.pause(5000);
     agree = await findButton({ driver, text: 'Next' });
     await driver.pause(5000);
-    let code = await getCodeTiktok({ cookie });
+    code = await getCodeTiktok({ cookie });
     console.log("Mã tiktok nhận được: ", code);
     await driver.pause(3000);
-    await driver.sendKeys(Array.from(code));
+    agree = await findButton({ driver, xpath: '//android.view.View[@resource-id="root"]/android.view.View[2]/android.view.View/android.view.View[1]' });
+    const mapping = {
+      '0': 7,
+      '1': 8,
+      '2': 9,
+      '3': 10,
+      '4': 11,
+      '5': 12,
+      '6': 13,
+      '7': 14,
+      '8': 15,
+      '9': 16
+    };
+
+    for (let i = 0; i < code.length; i++) {
+      await driver.pressKeyCode(mapping[code[i]]); // 6
+      console.log("Đã nhập số: ", mapping[code[i]]);
+      await driver.pause(1000);
+    }
+
+
+  }
+  if ((is_continue && !is_code) || (is_code && code)) {
+    let account = {
+      password: password,
+      "meta.is_change_password_mobile": true
+    }
+    await updateAccountToServer({ email, account });
   }
 
 }
-async function handleChangeEmail({ driver, email, password }) {
-
-
+async function handleChangeEmail({ driver, email, password, cookie, old_email }) {
+  let rs = await getEmailTempIO()
+  email = rs.email
+  console.log("Đang đổi email thành: ", email);
 
   await driver.pause(5000);
   let agree
@@ -116,20 +152,59 @@ async function handleChangeEmail({ driver, email, password }) {
   await driver.pause(5000);
   agree = await findButton({ driver, text: 'Change email' });
   await driver.pause(5000);
-  agree = await findButton({ driver, text: 'Password' });
-  await driver.pause(5000);
+  let is_verify = await findButton({ driver, text: 'Verify it’s really you' });
+  if (is_verify) {
+    await driver.pause(5000);
+    let is_password = await findButton({ driver, text: 'Password' });
+    if (is_password) {
+      await driver.pause(3000);
+      agree = await findButton({ driver, text: 'Next' });
+      await driver.pause(3000);
+      await findButton({ driver, xpath: "//android.widget.EditText" });
+      await driver.pause(3000);
+      await driver.sendKeys(Array.from(password));
+      await driver.pause(3000);
+      agree = await findButton({ driver, text: 'Next' });
+      await driver.pause(3000);
+
+    } else {
+          let [temp, domain] = old_email.split("@");
+        let email_hint = temp[0] + "***" + temp[temp.length - 1] + "@" + domain;
+        let is_code = await findButton({ driver, text: email_hint });
 
 
-  agree = await findButton({ driver, text: 'Next' });
-  await driver.pause(7000);
+        if (is_code) {
+          await driver.pause(5000);
+          agree = await findButton({ driver, text: 'Next' });
+          await driver.pause(5000);
+          let code = await getCodeTiktok({ cookie });
+          console.log("Mã tiktok nhận được: ", code);
+          await driver.pause(3000);
+          agree = await findButton({ driver, xpath: '//android.view.View[@resource-id="root"]/android.view.View[2]/android.view.View/android.view.View[1]' });
+          const mapping = {
+            '0': 7,
+            '1': 8,
+            '2': 9,
+            '3': 10,
+            '4': 11,
+            '5': 12,
+            '6': 13,
+            '7': 14,
+            '8': 15,
+            '9': 16
+          };
 
-  agree = await findButton({ driver, text: 'Enter password' });
-  await driver.pause(5000);
+          for (let i = 0; i < code.length; i++) {
+            await driver.pressKeyCode(mapping[code[i]]); // 6
+            console.log("Đã nhập số: ", mapping[code[i]]);
+            await driver.pause(1000);
+          }
 
-  await driver.sendKeys(Array.from(password));
-  await driver.pause(5000);
-  agree = await findButton({ driver, text: 'Next' });
-  await driver.pause(8000);
+
+        }
+    }
+  }
+
 
   agree = await findButton({ driver, text: 'Enter email' });
 
@@ -138,8 +213,32 @@ async function handleChangeEmail({ driver, email, password }) {
   await driver.pause(5000);
 
   agree = await findButton({ driver, text: 'Continue' });
-  let { email: newEmail, token } = await getEmailTempIOExist(email);
-  let code = await getTiktokCodeTempIO({ email: newEmail, token });
+  let code = await getTiktokCodeTempIO({ email, token: rs.token });
+
+  if (code) {
+    console.log("Mã tiktok nhận được: ", code);
+    await driver.pause(3000);
+    agree = await findButton({ driver, xpath: '//android.view.View[@resource-id="root"]/android.view.View[2]/android.view.View/android.view.View[1]' });
+    const mapping = {
+      '0': 7,
+      '1': 8,
+      '2': 9,
+      '3': 10,
+      '4': 11,
+      '5': 12,
+      '6': 13,
+      '7': 14,
+      '8': 15,
+      '9': 16
+    };
+
+    for (let i = 0; i < code.length; i++) {
+      await driver.pressKeyCode(mapping[code[i]]); // 6
+      console.log("Đã nhập số: ", mapping[code[i]]);
+      await driver.pause(1000);
+    }
+
+  }
 }
 async function handleAuthGoogle({ driver, email, password }) {
   let agree;
@@ -167,24 +266,24 @@ async function handleAuthGoogle({ driver, email, password }) {
   await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
   await driver.pause(1000);
   agree = await findButton({ driver, text: 'NEXT' });
-    await driver.pause(3000);
-      await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
+  await driver.pause(3000);
+  await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
   await driver.pause(1000);
   agree = await findButton({ driver, text: 'ACCEPT' });
   await driver.pause(5000);
-    await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
+  await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
   await driver.pause(1000);
   agree = await findButton({ driver, text: 'NEXT' });
   await driver.pause(6000);
-    await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
+  await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
   await driver.pause(1000);
   agree = await findButton({ driver, text: 'I UNDERSTAND' });
   await driver.pause(5000);
-    await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
+  await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
   await driver.pause(1000);
   agree = await findButton({ driver, text: 'I agree' });
   await driver.pause(3000);
-    await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
+  await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
   await driver.pause(1000);
   agree = await findButton({ driver, text: 'ACCEPT' });
 }
@@ -258,13 +357,41 @@ async function main({ cookie, email, password, newEmail }) {
   await driver.pause(3000);
   await handleAuthGoogle({ driver, email, password });
   await driver.pause(10000);
-  await init({ driver });
+  await init({ driver, email, cookie });
   await driver.pause(5000);
+
+   await driver.pause(3000);
+   agree = await findButton({ driver, text: 'Profile' });
+  await driver.pause(3000);
+  await findButton({ driver, text: '', xpath: '//android.widget.ImageView[@content-desc="Lock"]' });
+  //tab giữa màn hình
+  await driver.performActions([{
+    type: 'pointer',
+    id: 'finger1',
+    parameters: { pointerType: 'touch' },
+    actions: [
+      { type: 'pointerMove', duration: 0, x: 540, y: 1200 },
+      { type: 'pointerDown', button: 0 },
+      { type: 'pause', duration: 100 },
+      { type: 'pointerUp', button: 0 }
+    ]
+  }]);
+  await driver.pause(3000);
+  agree = await findButton({ driver, text: '', xpath: '//android.widget.Button[@content-desc="Profile menu"]' });
+
+
+  await driver.pause(7000);
+
+  agree = await findButton({ driver, text: 'Settings and privacy' });
+
+  await driver.pause(5000);
+
+  agree = await findButton({ driver, text: 'Account', index: 1 });
   await handleChangePassword({ driver, password: 'Thaibinha3@12345', cookie, email });
   await driver.pause(5000);
   console.log("✅ Password changed successfully");
 
-  await handleChangeEmail({ driver, email: newEmail, password: 'Thaibinha3@12345', cookie });
+  await handleChangeEmail({ driver, email: newEmail, old_email: email, password: 'Thaibinha3@12345', cookie });
   //   await driver.deleteSession();
 }
 
@@ -468,4 +595,4 @@ async function findButton({ driver, text, index = 0, xpath, isClick = true }) {
 
 
 
-main({ email: 'laciemcleane8854@mygkhs.us', password: 'Phat3479', newEmail: 'bmny5ypoc9@mkzaso.com', cookie: 'COMPASS=gmail_ps=Cp4BAAlriVdYOAkWITYoBW7zeiVP7GtgI_TFPweq7HzMh0QWB1NoWgGEx_k9iHbHrs7rrX4sqr8ho-IjwGf0YRlM9eCIJ2CY45sGMcY8ZpfweL8CWLaU5BhZPYL_lHo-09p2zazg8xXxcirBM24gjt6-huZLiseKxQRshdPOmCBLwy7W69TbDlRSybIz7yeTK4M-TaCaTBRxSpXxv9-ClzMQ4NfEyQYa1QEACWuJVzkJ4LRnLVutoBl2ZZDIpXILtoQnmO3jOQ9rmLG5EqBLtEwP0xq9twrI0ektmmvRV9EXVoQphOXONqxQrE-Aiyicd5h4fshBqH-sM8tJo20gaTugnxIFgrsJOxrcDVmLl-H0iiBq_eUOxYlUKiYisETGt-NK-l8TFd_ldCqyA-3nE9zETXRjXMWH_yd6SK9l4lHm1TagW9zw2gsjyayPioaPorIzMFUkkomSHplBSNSTt3ar0VbVAWMtqt6H0sFK9udzAhGebsO8X543HLCi-gYwAQ:gmail=CsIBAAlriVd0cY-MRB4WJdCI778gHRMQsun-8gi3WybOFGpLQSeHhi9tG2VSset7RNYWAIm_jj-azPCPwIRPyTUtrP9r25zCtl73CyZj7eb4q_c0a3hSZbKoQ22MselfaqvADEdffQA3C54IZJBtYpkvNLZUdsGf_k5l51TF71mvsk7EXQEQfEDg6n8USQkNGfpuFK39TEmblfE3r_iFN19wZNqqSwFbEa15c5obpDt1t4h6gQhxU44Ka_yov2o2VQ4M-8MQst_EyQYa-QEACWuJV-6JATYPW4K-cwW3APMd6u8JUKYKgqmhBorKps4wURNMpADFfiTjPjW814xGcIBk-iR5BnxrA9N7H0IMf60J33-aoVX128a9v0U7f1Pp9Gj-1c9zOcBoYYqFvsxvPflZ8JPow_GAlXQwhDhEtkg-D2MfzKWUE_mP7Vxlh9QExZXhIf2zy9gz1jH-RiSzEIrV8PTrO3iYqKk4_69C2tPLm_Bunm4rZOSFjVzl36jERhROHNkqHnaPWBFA0tLO5KCiAYoBy13iyTOCnk09V6hxSqYPs4c086k3KO4nkKOSikdcejDOuZEUmWTjYvRvuuLujVlo1QEwAQ; SID=g.a0004AjGA5CyhYPtLcP2yVFdFlB1CThx01hIIqhlMEDKUvQFD4mfALLsr49UZ_08eu2FlvwAcAACgYKAdsSARESFQHGX2Mip1_-Tj_nktSIltC0sUZ82RoVAUF8yKp95rbxT-fqL0qicT0_O0eM0076; __Secure-1PSID=g.a0004AjGA5CyhYPtLcP2yVFdFlB1CThx01hIIqhlMEDKUvQFD4mfAA6FpcA07d-ZEwL5oxI7-wACgYKAZsSARESFQHGX2MiC-dL9UGlnTKZCgz4EVMjMxoVAUF8yKoLs2XAAhODE_cOsNirbBX60076; __Secure-3PSID=g.a0004AjGA5CyhYPtLcP2yVFdFlB1CThx01hIIqhlMEDKUvQFD4mfRB9oeUFkMFuSEF9sHqBhcQACgYKAcUSARESFQHGX2Mivv7ju_ZhqPdABH7_GomCuhoVAUF8yKr4nMH_SfSSYdOmwaV4MLes0076; HSID=A-E2pVFUSYEswE-Nf; SSID=A6FYdSQKtmbo0_CI1; APISID=PJDzo-oFhQ2Sgrmn/Awxc4_RaxymjeL1Ia; SAPISID=x1wpy2bopP3yvqJV/ApfweVOPVc8iTtKyD; __Secure-1PAPISID=x1wpy2bopP3yvqJV/ApfweVOPVc8iTtKyD; __Secure-3PAPISID=x1wpy2bopP3yvqJV/ApfweVOPVc8iTtKyD; OSID=g.a0004AjGAyJ0islxznNB7AdMdqDP1ym7oVhuYScUa_Slv3ss5FYVhYjV53QP1PQPItngL_ZVfAACgYKAR4SARESFQHGX2MiAG9kqHfXzosGoUQG2FmD8RoVAUF8yKr0q-7_r9SF_VuRXXRuEPm60076; __Secure-OSID=g.a0004AjGAyJ0islxznNB7AdMdqDP1ym7oVhuYScUa_Slv3ss5FYVPCYapOkTbRCt8WubChjQCQACgYKAU4SARESFQHGX2MiwDuMUS0GXZmGfICywsrYExoVAUF8yKoHONvBdeEsF55V0MccKKV30076; __Host-GMAIL_SCH_GMN=1; __Host-GMAIL_SCH_GMS=1; __Host-GMAIL_SCH_GML=1; NID=526=D8RZvDDC-8eFuGaDISATg02WgBoReqv5oAyuJE1b5zf0x7FScOxIKB8cHTYWEU78L9kpR3_MwQpEzZzkZBeAuVEPybLiHuX-IxdTSX--D6u42U5B_cz67CULsRTCjvKCXVf_z6CbmfuD_McO-r6CTfB28AUgI2un57N7xTarTAKz72p1NVSHz-WFXLgVZvckRpgeJczJy_30oFoWsgh35tquifsOxfYdt2p_QnSoznWNoUVZjJIMHd-NXSmkQP7fmAt7CH_MPMLYHq3WBC0VMbP3lZ6JJnfVzmc9eUM6aNEjuu47RbFrgh-fuMa3DNqkzH-F8MR7pSUk-0Pi6it5gMguf_LgYGj1f7LzGhgEvPuNN88nQs6_YHaIvOR5-Dp1T6DfFbkeGvfphNfAz2-iaSZoYnv78UemEqTD5K41Qdk7aGK8uAx_NNGiVVdViNj9mSbsWWooVunYIsbvf-SCGdFHFvcBfmY360Lnzgd0xgH98kIaER_OmE6Qb_QdRAjf8uXOLGYFjx_y4KQ8yRMCn4uh1BaCr3kPQjtX28Q6FbSmndI1wdfMIJog32TBGXa03vaKBh8Vzjm6dpbkzZ3N52ytB3jDSQalPn-wwhglJNS6tyULldr_h1SJYbKebeWsHgG0USH7JC3ktNLW_Es7kmWt4oU; SIDCC=AKEyXzXUUo3oktPE5AeaaR7c9fWSa3eDc4Hq7OByhgjjPTxx6z-MITtdPRwnK7CMwccAsolDjw; __Secure-1PSIDCC=AKEyXzUeRWd4DGodtnAy0BBWTfHrgo52imhbjvyhMQIt8hHrhTi3uu32cmAPQIpISlztC_tB; __Secure-3PSIDCC=AKEyXzWxFAPEjkmIQZ9iZgZZgSIzHT9cvz9S0zHlCci_CZmole0_eRPnDu_UTU2T1H7q9o05' });
+main({ email: 'davetapina2dfte@gkhigh.us', password: 'Phat3479', newEmail: 'bmny5ypoc9@mkzaso.com', cookie: 'COMPASS=gmail_ps=Cp4BAAlriVeLPdgGYckS3in6uiDsfpjxtIFgX9FL6GwWHQ95Ik4iPYO8yfQbI3A15w6aLQo6kVeLsrMsyb8IAWjGrvvrsvUT3AmsZgnWNJbMEcpSqR84JU150vrU1KWgnaruGNDMHchGu2kI84z2s3t4UD3SrJfwRf7c17j9FOxV77sQTFoPaRmenolVTTy8u2pv1vNHYdA9_0SXNr75W-EQjY3KyQYa1QEACWuJV0Fhy5AGCT0mMXARMcL37SJ3v74OG23VyFmrUPRoppk8_C9wky_jcB3oTEIS2YfKSoULtjof56IPcOyX_Q7CwEG1vNDBYXdGXTeJYo2rV9_tjvWKZWJiWlfjZeg7DA3wBBQqckK0vXmgoJmzgn72emY6gf7R8s2IRH6XNghQgwvgFJY87Cu_m6OlEsmYHa5wTDQVz3DcOua9F78P5Ww0GJggjoCegjgULfhaH4lGOgUpEKC4rFLG2biLCxDIaXZTlJHSoThknVVJ0tqVz3PZ8zowAQ:gmail=CsIBAAlriVf-uP5A77HnCdLt4FN2WufQ2TyysoGca-cnZ_U9GdnRRYYUPqpNcH7PuvQ5ImO43YuYYbUcamrZ8bspme2Jqr04WbsZqLNTgN1m_mIbkAnEhFYeEBV7CpP_m20z_mvFIULA_UFcM7vihs2oKfMRkFyZ9WppEd2BdJwbM1Zw4uxZGWly3lFuClsh5J2nJ18_I2uyZtfkKfmQEE1UYpGaoEP34rBy0PqREoLhpeFaelbqf8ETBmr7aggxV7HV3Y8Q6JTKyQYa-QEACWuJV66xx5bO5dwFhxsTRVXao2e5PsvPJHLOKb2nmQTO3_1uEVWCWVjDVV3OHDKjX6NAdiG0b3a3zkO-AnjGmEd9Qkcr2UrX6c0es_ruKendYrDFAGvex6LwD2p6FA1auilGwHojhX8UZ60iAt58_JgILtc1SkvNoT2LvNRE9oc5sRBWTCijZun48XZoS66sFhTEi5_S5FPfQMe0-RRmXSAtM3w39MJG1bklf-SXZnbMLjoOin4TSb9Wwj6FbbcTMSvmXWyz5HGmCGvw_IrMQyRf2pDvfIfAeqQcqHXkRYYgpCfPCnij5v0daPAEek7m59UVvtWTadMwAQ; NID=526=fOUWF8Q_qAbzNBdCSbzNV7zyIPJVITUjnI3eReXstXqvIxUvITtuwQfxD-Smgdbucsujjqs1p0d2cGe4wA9djbsK7Sd4PRxoMTNv7_OsV6N25aACoRZmbHoHJ0uqYl2fCzSUcWhKRMgdqhPoUGAkVx-J-hEU4oQZYLjMeO5DdeooxF0P-JqeU_z8V8UO6QUUJLWtLBuS9Ne-TVzrac7sPTZBGXQqGsWJ1s1yWb6eQBPFT8s8yq4KKQO0G-VjrxebIywVhBngpq9jQseL7buDqdWNqpcNgE0UgP6U_1egPhO4ArMefaubbFiZCoxQ86ROH6nesrLmlKenZfE4knfxsWMumOFRf-kDn7mglrZf4YG1eC0KdemxGg54hORcmH4HmFimB8MaShKBmvQnw24_XgJMby_CZHUIWVPUhsarqI9toALYiQKx50uOa--k08qnPkPVtCGCsWGNEPY9VDYwy6ZqAY0--W5OZ2E4yHXqDcW36jbv2aVosM92Ex4gQlhLbVNpSsMb62mrQJYn6-ElXdjpnIfi3fnPUjyLAWngoQmeOVsFswuAW_OV9DNYZsQT_Z6Qk6CAOqUxdzEWSbM97rX4jLr4qVDmEI09oO0MviUfXFNVB9j09xIBFpkOm25Br8OaoHGv; SID=g.a0004AhsLoVbZVbXfs6lreOW22o3TYJ_dU6VZnfRw9UQHkYuCZXLhKcCr_Tzs58lRfYjtfqMQwACgYKAeYSARcSFQHGX2MiiEPFSpX2j9DROJA1msYoDhoVAUF8yKp_TuaPC2dR3k_Xw5wmubdi0076; __Secure-1PSID=g.a0004AhsLoVbZVbXfs6lreOW22o3TYJ_dU6VZnfRw9UQHkYuCZXL-JOPwRLHebUZinGjfA-uAQACgYKAZASARcSFQHGX2MiZfHWWMqbk7PVKVvvRj942BoVAUF8yKpma0kkv6ngmz9-Z5R_2myA0076; __Secure-3PSID=g.a0004AhsLoVbZVbXfs6lreOW22o3TYJ_dU6VZnfRw9UQHkYuCZXLHIhw3seezENQSweXyVljaQACgYKAZwSARcSFQHGX2Mi6naCUZobyCR17_Fd83RgNRoVAUF8yKookCu8M8ddVCT59Y_AMpnB0076; HSID=A9NmSKTDTUpmwPDTO; SSID=A1eYXL4gnMw5YIVKX; APISID=kVp7Pwq-iMLibjNH/A90dKRxqu_fZQwqXX; SAPISID=HpNiVNge0ppnHHhA/AefeLmSAz1rQlM6ao; __Secure-1PAPISID=HpNiVNge0ppnHHhA/AefeLmSAz1rQlM6ao; __Secure-3PAPISID=HpNiVNge0ppnHHhA/AefeLmSAz1rQlM6ao; OSID=g.a0004AhsLvPnvkNbNEn6PJLSiJvieJypFakg23ynJ7Hk9hF49vJhDpvR1SkuPBteFN5QvnH6SAACgYKARsSARcSFQHGX2Mi3DNd3-SFhOzy0TWP89INjxoVAUF8yKqMl1PcPlBKyIHwmmNQYkAf0076; __Secure-OSID=g.a0004AhsLvPnvkNbNEn6PJLSiJvieJypFakg23ynJ7Hk9hF49vJhQG-SRUThVhfv5QEyBtWO2AACgYKAf0SARcSFQHGX2Mi62ANSgK9zhfhSCmTW1_LWxoVAUF8yKpgt1QjOdBQ_1lsfu2o28zV0076; __Host-GMAIL_SCH_GMN=1; __Host-GMAIL_SCH_GMS=1; __Host-GMAIL_SCH_GML=1; SIDCC=AKEyXzXYpvlblazV7SmRmmRhiV5amVJvwti-g-cq1cvaMuplLBzfa8qk7o3ejOmOJkdkPnhEmg; __Secure-1PSIDCC=AKEyXzVNRuDiR-IhxRFyw7Wdyta7fYv7SWDR-DZmphwPkULumvtFIm2DK4ORE_p1UP_qMoSj; __Secure-3PSIDCC=AKEyXzVpADwiKo0RWLcTRR3ur0WSmSyeEohpexS7V3s-ZKya-LJaH_ZpXUhMH_zfNuH5qBMp' });

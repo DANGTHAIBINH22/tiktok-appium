@@ -486,7 +486,7 @@ function isNumericString(str) {
       }
   
 }
-async function getCodeTiktok({  cookie }) {
+async function getCodeTiktok({  cookie, current=0}) {
     let  {data_link,sdpc,GM_ID_KEY,date_p} = await getInitGmail({cookie_string:cookie})
 
     let decryptedData = {
@@ -515,6 +515,54 @@ async function getCodeTiktok({  cookie }) {
     if(code){
         return code
     }
+    if(current <3){
+        await delay(5000)
+        return await getCodeTiktok({ cookie, current: current +1})
+    }
     return ""
 }
-export { getEmailTempIOExist, getMessageTempIO, getTiktokCodeTempIO, makeRequest, delay, parserProxyString ,    getMessagesGmail, getInitGmail, parserMesssageHtml, getcodeOther, getTextFromHtml,getUrlActive,getCodeTiktok,parseMessagesGmail };
+function generateRandomName(length) {
+    const characters = 'abcdefghijklmnopqrstuvwxyz';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+}
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min);
+}
+async function updateAccountToServer({email, account, proxy_list=null}) {
+    try{
+        let proxy = "";
+        if(proxy_list && proxy_list.length){
+            proxy = proxy_list[Math.floor(Math.random() * proxy_list.length)];
+        }
+        let url = ("http://217.15.163.20:3002" || "http://localhost:3000")+"/api/accounts/updateAccountInfo?email="+email
+        let res = await makeRequest({
+            url, 
+            headers: {
+                "Content-Type": "application/json"
+            }, 
+            method: "POST", 
+            body: JSON.stringify(account),
+            proxy: proxy,
+            proxy_list: proxy_list
+        })
+        let { body, bodyJson, status, headers, error} = res;
+        console.log("updateAccountToServer",bodyJson)
+        return bodyJson
+    }catch(e){
+        console.log("error updateAccountToServer",e)
+        return false
+    }
+}
+async function getEmailTempIO(proxy_list=null) {
+    let all_domain = `vwhins.com,jxpomup.com,ibolinva.com,wyoxafp.com,osxofulk.com,jkotypc.com,cmhvzylmfc.com,zudpck.com,daouse.com,illubd.com,mkzaso.com,mrotzis.com,xkxkud.com,wnbaldwy.com,bwmyga.com`.split(',')
+    all_domain = `zudpck.com,daouse.com,illubd.com,mkzaso.com,mrotzis.com,xkxkud.com,wnbaldwy.com,bwmyga.com`.split(',')
+    let email_input = generateRandomName(12)+getRandomInt(111111, 888888).toString()+"@"+all_domain[Math.floor(Math.random() * all_domain.length)];
+    return await getEmailTempIOExist(email_input, proxy_list)
+}
+export { getEmailTempIOExist, getMessageTempIO, getTiktokCodeTempIO, makeRequest, delay, parserProxyString ,    getMessagesGmail, getInitGmail, parserMesssageHtml, getcodeOther, getTextFromHtml,getUrlActive,getCodeTiktok,parseMessagesGmail,getEmailTempIO,updateAccountToServer };
