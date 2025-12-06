@@ -263,28 +263,31 @@ async function handleAuthGoogle({ driver, email, password, old_email, cookie }) 
 
   await driver.sendKeys(Array.from(password));
   await driver.pause(5000);
-  await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
   await driver.pause(1000);
   agree = await findButton({ driver, text: 'NEXT' });
   await driver.pause(3000);
-  await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
-  await driver.pause(1000);
+  let content = await findButton({ driver, text: 'Back up device data' });
+  await driver.pause(5000);
+
+  if (content) {
+    let { x, y } = await content.getLocation();
+    console.log(`Nút Back up device data tại tọa độ x=${x}, y=${y}`);
+    await swipe(driver, x, y, x, y -200);
+    await driver.pause(5000);
+  } 
+
   agree = await findButton({ driver, text: 'ACCEPT' });
   await driver.pause(5000);
-  await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
   await driver.pause(1000);
   agree = await findButton({ driver, text: 'NEXT' });
   await driver.pause(6000);
-  await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
   await driver.pause(1000);
   agree = await findButton({ driver, text: 'I UNDERSTAND' });
   await driver.pause(5000);
-  await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
-  await driver.pause(1000);
+
   agree = await findButton({ driver, text: 'I agree' });
   await driver.pause(3000);
-  await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
-  await driver.pause(1000);
+
   agree = await findButton({ driver, text: 'ACCEPT' });
   await driver.pause(5000);
   let is_verify = await findButton({ driver, text: 'Verify it’s really you' });
