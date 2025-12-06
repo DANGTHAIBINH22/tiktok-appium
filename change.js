@@ -82,7 +82,7 @@ async function handleChangePassword({ driver, password, cookie, email }) {
 
   await driver.pause(5000);
 
-  agree = await findButton({ driver, text: 'Password' });
+  let agree = await findButton({ driver, text: 'Password' });
   await driver.pause(3000);
 
   agree = await findButton({ driver, text: 'Password', index: 1 });
@@ -244,7 +244,7 @@ async function handleAuthGoogle({ driver, email, password, old_email, cookie }) 
   let agree;
   agree = await findButton({ driver, text: 'Continue with Google' });
 
-  await driver.pause(10000);
+  await driver.pause(15000);
   agree = await findButton({ driver, text: 'Add another account' });
   await driver.pause(5000);
 
@@ -358,29 +358,6 @@ async function main({ cookie, email, password, newEmail }) {
   await driver.pause(8000);
   await driver.pause(3000);
 
-  await driver.performActions([{
-    type: 'pointer',
-    id: 'finger1',
-    parameters: { pointerType: 'touch' },
-    actions: [
-      { type: 'pointerMove', duration: 0, x: 5400, y: 1200 },
-      { type: 'pointerDown', button: 0 },
-      { type: 'pause', duration: 100 },
-      { type: 'pointerUp', button: 0 }
-    ]
-  }]);
-
-  await driver.performActions([{
-    type: 'pointer',
-    id: 'finger1',
-    parameters: { pointerType: 'touch' },
-    actions: [
-      { type: 'pointerMove', duration: 0, x: 5400, y: 1200 },
-      { type: 'pointerDown', button: 0 },
-      { type: 'pause', duration: 100 },
-      { type: 'pointerUp', button: 0 }
-    ]
-  }]);
 
   let content = await findButton({ driver, text: 'Sign in with Google' });
   await driver.pause(5000);
@@ -637,4 +614,4 @@ async function findButton({ driver, text, index = 0, xpath, isClick = true }) {
 
 
 
-main({ email: 'davetapina2dfte@gkhigh.us', password: 'Phat3479', newEmail: 'bmny5ypoc9@mkzaso.com', cookie: 'COMPASS=gmail_ps=Cp4BAAlriVeLPdgGYckS3in6uiDsfpjxtIFgX9FL6GwWHQ95Ik4iPYO8yfQbI3A15w6aLQo6kVeLsrMsyb8IAWjGrvvrsvUT3AmsZgnWNJbMEcpSqR84JU150vrU1KWgnaruGNDMHchGu2kI84z2s3t4UD3SrJfwRf7c17j9FOxV77sQTFoPaRmenolVTTy8u2pv1vNHYdA9_0SXNr75W-EQjY3KyQYa1QEACWuJV0Fhy5AGCT0mMXARMcL37SJ3v74OG23VyFmrUPRoppk8_C9wky_jcB3oTEIS2YfKSoULtjof56IPcOyX_Q7CwEG1vNDBYXdGXTeJYo2rV9_tjvWKZWJiWlfjZeg7DA3wBBQqckK0vXmgoJmzgn72emY6gf7R8s2IRH6XNghQgwvgFJY87Cu_m6OlEsmYHa5wTDQVz3DcOua9F78P5Ww0GJggjoCegjgULfhaH4lGOgUpEKC4rFLG2biLCxDIaXZTlJHSoThknVVJ0tqVz3PZ8zowAQ:gmail=CsIBAAlriVf-uP5A77HnCdLt4FN2WufQ2TyysoGca-cnZ_U9GdnRRYYUPqpNcH7PuvQ5ImO43YuYYbUcamrZ8bspme2Jqr04WbsZqLNTgN1m_mIbkAnEhFYeEBV7CpP_m20z_mvFIULA_UFcM7vihs2oKfMRkFyZ9WppEd2BdJwbM1Zw4uxZGWly3lFuClsh5J2nJ18_I2uyZtfkKfmQEE1UYpGaoEP34rBy0PqREoLhpeFaelbqf8ETBmr7aggxV7HV3Y8Q6JTKyQYa-QEACWuJV66xx5bO5dwFhxsTRVXao2e5PsvPJHLOKb2nmQTO3_1uEVWCWVjDVV3OHDKjX6NAdiG0b3a3zkO-AnjGmEd9Qkcr2UrX6c0es_ruKendYrDFAGvex6LwD2p6FA1auilGwHojhX8UZ60iAt58_JgILtc1SkvNoT2LvNRE9oc5sRBWTCijZun48XZoS66sFhTEi5_S5FPfQMe0-RRmXSAtM3w39MJG1bklf-SXZnbMLjoOin4TSb9Wwj6FbbcTMSvmXWyz5HGmCGvw_IrMQyRf2pDvfIfAeqQcqHXkRYYgpCfPCnij5v0daPAEek7m59UVvtWTadMwAQ; NID=526=fOUWF8Q_qAbzNBdCSbzNV7zyIPJVITUjnI3eReXstXqvIxUvITtuwQfxD-Smgdbucsujjqs1p0d2cGe4wA9djbsK7Sd4PRxoMTNv7_OsV6N25aACoRZmbHoHJ0uqYl2fCzSUcWhKRMgdqhPoUGAkVx-J-hEU4oQZYLjMeO5DdeooxF0P-JqeU_z8V8UO6QUUJLWtLBuS9Ne-TVzrac7sPTZBGXQqGsWJ1s1yWb6eQBPFT8s8yq4KKQO0G-VjrxebIywVhBngpq9jQseL7buDqdWNqpcNgE0UgP6U_1egPhO4ArMefaubbFiZCoxQ86ROH6nesrLmlKenZfE4knfxsWMumOFRf-kDn7mglrZf4YG1eC0KdemxGg54hORcmH4HmFimB8MaShKBmvQnw24_XgJMby_CZHUIWVPUhsarqI9toALYiQKx50uOa--k08qnPkPVtCGCsWGNEPY9VDYwy6ZqAY0--W5OZ2E4yHXqDcW36jbv2aVosM92Ex4gQlhLbVNpSsMb62mrQJYn6-ElXdjpnIfi3fnPUjyLAWngoQmeOVsFswuAW_OV9DNYZsQT_Z6Qk6CAOqUxdzEWSbM97rX4jLr4qVDmEI09oO0MviUfXFNVB9j09xIBFpkOm25Br8OaoHGv; SID=g.a0004AhsLoVbZVbXfs6lreOW22o3TYJ_dU6VZnfRw9UQHkYuCZXLhKcCr_Tzs58lRfYjtfqMQwACgYKAeYSARcSFQHGX2MiiEPFSpX2j9DROJA1msYoDhoVAUF8yKp_TuaPC2dR3k_Xw5wmubdi0076; __Secure-1PSID=g.a0004AhsLoVbZVbXfs6lreOW22o3TYJ_dU6VZnfRw9UQHkYuCZXL-JOPwRLHebUZinGjfA-uAQACgYKAZASARcSFQHGX2MiZfHWWMqbk7PVKVvvRj942BoVAUF8yKpma0kkv6ngmz9-Z5R_2myA0076; __Secure-3PSID=g.a0004AhsLoVbZVbXfs6lreOW22o3TYJ_dU6VZnfRw9UQHkYuCZXLHIhw3seezENQSweXyVljaQACgYKAZwSARcSFQHGX2Mi6naCUZobyCR17_Fd83RgNRoVAUF8yKookCu8M8ddVCT59Y_AMpnB0076; HSID=A9NmSKTDTUpmwPDTO; SSID=A1eYXL4gnMw5YIVKX; APISID=kVp7Pwq-iMLibjNH/A90dKRxqu_fZQwqXX; SAPISID=HpNiVNge0ppnHHhA/AefeLmSAz1rQlM6ao; __Secure-1PAPISID=HpNiVNge0ppnHHhA/AefeLmSAz1rQlM6ao; __Secure-3PAPISID=HpNiVNge0ppnHHhA/AefeLmSAz1rQlM6ao; OSID=g.a0004AhsLvPnvkNbNEn6PJLSiJvieJypFakg23ynJ7Hk9hF49vJhDpvR1SkuPBteFN5QvnH6SAACgYKARsSARcSFQHGX2Mi3DNd3-SFhOzy0TWP89INjxoVAUF8yKqMl1PcPlBKyIHwmmNQYkAf0076; __Secure-OSID=g.a0004AhsLvPnvkNbNEn6PJLSiJvieJypFakg23ynJ7Hk9hF49vJhQG-SRUThVhfv5QEyBtWO2AACgYKAf0SARcSFQHGX2Mi62ANSgK9zhfhSCmTW1_LWxoVAUF8yKpgt1QjOdBQ_1lsfu2o28zV0076; __Host-GMAIL_SCH_GMN=1; __Host-GMAIL_SCH_GMS=1; __Host-GMAIL_SCH_GML=1; SIDCC=AKEyXzXYpvlblazV7SmRmmRhiV5amVJvwti-g-cq1cvaMuplLBzfa8qk7o3ejOmOJkdkPnhEmg; __Secure-1PSIDCC=AKEyXzVNRuDiR-IhxRFyw7Wdyta7fYv7SWDR-DZmphwPkULumvtFIm2DK4ORE_p1UP_qMoSj; __Secure-3PSIDCC=AKEyXzVpADwiKo0RWLcTRR3ur0WSmSyeEohpexS7V3s-ZKya-LJaH_ZpXUhMH_zfNuH5qBMp' });
+main({ email: 'lolawalterkhcaq@learncolumbus.us', password: 'Phat3479', cookie: 'COMPASS=gmail_ps=Cp4BAAlriVefyxyOH7lXXqj2armX4qvPaL0JZgLFxAbAWm24wZqStUAKGsYF0WBNT5FIVNPoqB65AHG6d694q41BFrHFR2G8UFWPnxmf_SGDqRlcnR3G6HfKdBCf2H4NTe1VaG21VRf-EQLBBtSPZbFNx0N4xpwcdcRK7-fwlFaYsVv1SedA2nIAiqKIditzRWcYHBurMX76alzrP7zAQAgQ1IzVyQYa1QEACWuJV85ccjuF7yWMwJH6nbhRJtOrf9OkGuSMjiqaMQzJR06EWjquCLbi5dLdX9j6r7BmQ5cZN6EAgR9kFYtM4vPwkKsp-0HekfQWRmrXcM30QxwuQBT9sp0QETelTsWYCgWQDOjmuhROzvtWic5-eylTbFbGUsDm-tLAqUZgaTJ3RUEdk_6_OkVGbE-irvKnSntV5gHTmVvmM4-Or3DZFyLcljX0hAgucZCHB8QP5-cD4CZj7J2J3qUlVSPJ7GKpu1SBBs6hzIrtGxPEgnh78gVWHfYwAQ:gmail=CsIBAAlriVca-8WzeIVBsOP04zn3PZOTYa1U9qYHRMIgQ_vV7miivAyj0cUPtQeaJlUN-eN6vQibS4UYyh4tMc177VmP-xmv03Q1uKE2Xjm4Apgps3HwccC4RUgjRJKHzy2iZmvJGviun8Y17wwFWtdWW6kYFzFXH7OjGieIbSQ8SGQBMCrPdQnEeAeOvxWv0m9xzwQZxX2PNDo9eHEIofvTcfBrSCNA-to9zEXblrVjy7jTXl1-zySjHDjSQ22u3z6DFeEQgoDVyQYa-QEACWuJV8T9aSit9B-1u_vNpB1UFRmgrP-gTIbMeOq9iWfXJQNLA94AyP9OXLO_dP-wcP8CrbH_bupHsw6l3xy21KS8eYS7VHTuAPhwH2q4XgxHOaBt2vqwZ0uaYiau2wvmiXajsE3m6eAxrZAA-EBARJ9JF9VfTdGkY1ZRP8-ip-pu5cmMoyfbs2V_iGnIi0pbkB2WOCqDYntLL4572Fz-fJ7c28QAEIV_JxbqZMRfgk9C8uVlVui5QnslqKKPravyGKVhPWTwq8ua8urJPWgoI0ONu6TiSKl0ob4-d_w3cmmuUIsdTw_tvVo2x23cMB_I70Vx4xA9Eo4wAQ; SID=g.a0004Qj-XlyhgJ2iZ3AJ5ancLgykSHMwMbhCuSADazeGRrtE-_TLDrI0wGvKJc5GzvLr9OPndQACgYKAcYSARQSFQHGX2MiOdDGzaXY4qJdWzBuqVL3oxoVAUF8yKq0Co13FYeznsSb6LnvdlxH0076; __Secure-1PSID=g.a0004Qj-XlyhgJ2iZ3AJ5ancLgykSHMwMbhCuSADazeGRrtE-_TLwvHBI4NKixE2FMl3S9R6GAACgYKAaISARQSFQHGX2MiOq8T0BeB6Vscnz71jF5B1RoVAUF8yKoSBuplO7gJ-SIuUP7jyFbf0076; __Secure-3PSID=g.a0004Qj-XlyhgJ2iZ3AJ5ancLgykSHMwMbhCuSADazeGRrtE-_TLgaiDvFIzL9zIhTM-3nQqCAACgYKAXYSARQSFQHGX2Mi6GhefhEV8goY_FZJi6neERoVAUF8yKqn4EK1wsI0WIWe7IMYJGRy0076; HSID=Ar2O9YDLweIAW7zCK; SSID=AT1byaryrPY2-RBKj; APISID=zrWUe4ipdBCzZPEh/A1mDSE0pEtWEO4b_E; SAPISID=ARcHDBsLPSvU0nwY/AG3UFSksabAMMoDfG; __Secure-1PAPISID=ARcHDBsLPSvU0nwY/AG3UFSksabAMMoDfG; __Secure-3PAPISID=ARcHDBsLPSvU0nwY/AG3UFSksabAMMoDfG; OSID=g.a0004Qj-Xoq9-fm-OsgRr2MhpR_NHmcCkPvvLVUC7yWuVXwuXdRaZgfcnxbbl8cBsPiRTCOO4QACgYKAQASARQSFQHGX2MirG9B9ViANXBvSANZzyodrRoVAUF8yKqI1MRFwt5tglNBjvBlBI-s0076; __Secure-OSID=g.a0004Qj-Xoq9-fm-OsgRr2MhpR_NHmcCkPvvLVUC7yWuVXwuXdRa3aORrFfgmIrccDt-bNhKBwACgYKAbkSARQSFQHGX2MixY7w8psCVIcYJxtmuXHJ7hoVAUF8yKqP-0Ed5MzqQ5kD8BwSpdM-0076; __Host-GMAIL_SCH_GMN=1; __Host-GMAIL_SCH_GMS=1; __Host-GMAIL_SCH_GML=1; NID=527=L-oTLX5joEnPdVYNnqjWu-7H-b7p0wVMq3CYmg4y3eZfQW20yAH6IzAL5WGOrQ-gie1CGNVtbHv_ro9bzodXHeKlpyHQctZVcDEztPdq_EvzVuSXhPkeyx6_D1lxh9nC1lPXp30LUmQID4tvTZeeFnFw9HI6MBCFzlZh4kZ0Co287TH5owcyKPaejylvumP1VAQmBsR09O7TE6tSzELbMzu5dXG2JDPMUAcrRc4wsWP06I4dyJvEh7kaL-giv_S0zLO5MCvFiMALBgID8wdUg9oO--nvCFm_AzwOZlZyQdzMzzKKeIMlpUx1p5vOPJBEVncO5o58DATeJmZptZz65SEsQTQr5AHcU8wn1IkjHqmJ__je-WOzUmKD1AUfzPbH9WD2fWs4kj0PpY1vq8V0_sSElcrieYP3nY9S2Oc1398SrvA2sP0Qw2-N9paYeEbmeXxo9fBpSDXyVCexjtPu5QfMBP_aLENvLmP4UAEFspsUzuuzmqkp9UYKCm7Z3XnH3NBr6LQ9D-0POBaUyTVrSJYxob1LaSIt1y7s2N9L4pqZg8q-G2KhPqSMoneFM3VPinlWq8-M8YjAyI2Q3OQpx8VEq89fl_gHJ1DtwXBTUvxDJdgP6EpOS905OFoMj1Ib7byNg-3u14UmE3iBiDisrvfcOQ; SIDCC=AKEyXzWNoWQii6mOw-iPb-GkjzevlawBnNvZTi9JbDgmShdJxJOEspJ_gBNgiYZHRwZIMfcFcQ; __Secure-1PSIDCC=AKEyXzXLAS2gYe1D0mJw64ER2GYzSEm-9QJErXxE1uPor6rSSoc1jcMH11TzQOfLtUN9ASdv; __Secure-3PSIDCC=AKEyXzWWai-BmWov1VXBiSIVCbHfufM-pu_2W_JaXa7PLNM1DOIQ35gVWRjf04JdKZ-BIkpiTQ' });
