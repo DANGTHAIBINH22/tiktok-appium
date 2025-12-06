@@ -78,7 +78,7 @@ async function init({ driver, email, cookie }) {
 }
 async function handleChangePassword({ driver, password, cookie, email }) {
 
- 
+
 
   await driver.pause(5000);
 
@@ -168,40 +168,40 @@ async function handleChangeEmail({ driver, email, password, cookie, old_email })
       await driver.pause(3000);
 
     } else {
-          let [temp, domain] = old_email.split("@");
-        let email_hint = temp[0] + "***" + temp[temp.length - 1] + "@" + domain;
-        let is_code = await findButton({ driver, text: email_hint });
+      let [temp, domain] = old_email.split("@");
+      let email_hint = temp[0] + "***" + temp[temp.length - 1] + "@" + domain;
+      let is_code = await findButton({ driver, text: email_hint });
 
 
-        if (is_code) {
-          await driver.pause(5000);
-          agree = await findButton({ driver, text: 'Next' });
-          await driver.pause(5000);
-          let code = await getCodeTiktok({ cookie });
-          console.log("Mã tiktok nhận được: ", code);
-          await driver.pause(3000);
-          agree = await findButton({ driver, xpath: '//android.view.View[@resource-id="root"]/android.view.View[2]/android.view.View/android.view.View[1]' });
-          const mapping = {
-            '0': 7,
-            '1': 8,
-            '2': 9,
-            '3': 10,
-            '4': 11,
-            '5': 12,
-            '6': 13,
-            '7': 14,
-            '8': 15,
-            '9': 16
-          };
+      if (is_code) {
+        await driver.pause(5000);
+        agree = await findButton({ driver, text: 'Next' });
+        await driver.pause(5000);
+        let code = await getCodeTiktok({ cookie });
+        console.log("Mã tiktok nhận được: ", code);
+        await driver.pause(3000);
+        agree = await findButton({ driver, xpath: '//android.view.View[@resource-id="root"]/android.view.View[2]/android.view.View/android.view.View[1]' });
+        const mapping = {
+          '0': 7,
+          '1': 8,
+          '2': 9,
+          '3': 10,
+          '4': 11,
+          '5': 12,
+          '6': 13,
+          '7': 14,
+          '8': 15,
+          '9': 16
+        };
 
-          for (let i = 0; i < code.length; i++) {
-            await driver.pressKeyCode(mapping[code[i]]); // 6
-            console.log("Đã nhập số: ", mapping[code[i]]);
-            await driver.pause(1000);
-          }
-
-
+        for (let i = 0; i < code.length; i++) {
+          await driver.pressKeyCode(mapping[code[i]]); // 6
+          console.log("Đã nhập số: ", mapping[code[i]]);
+          await driver.pause(1000);
         }
+
+
+      }
     }
   }
 
@@ -240,7 +240,7 @@ async function handleChangeEmail({ driver, email, password, cookie, old_email })
 
   }
 }
-async function handleAuthGoogle({ driver, email, password }) {
+async function handleAuthGoogle({ driver, email, password, old_email, cookie }) {
   let agree;
   agree = await findButton({ driver, text: 'Continue with Google' });
 
@@ -286,6 +286,48 @@ async function handleAuthGoogle({ driver, email, password }) {
   await swipe(driver, 600, 1700, 600, 400); // Vuốt lên
   await driver.pause(1000);
   agree = await findButton({ driver, text: 'ACCEPT' });
+  await driver.pause(5000);
+  let is_verify = await findButton({ driver, text: 'Verify it’s really you' });
+  if (is_verify) {
+    await driver.pause(5000);
+
+    let [temp, domain] = email.split("@");
+    let email_hint = temp[0] + "***" + temp[temp.length - 1] + "@" + domain;
+    let is_code = await findButton({ driver, text: email_hint });
+
+
+    if (is_code) {
+      await driver.pause(5000);
+      agree = await findButton({ driver, text: 'Next' });
+      await driver.pause(5000);
+      let code = await getCodeTiktok({ cookie });
+      console.log("Mã tiktok nhận được: ", code);
+      await driver.pause(3000);
+      agree = await findButton({ driver, xpath: '//android.view.View[@resource-id="root"]/android.view.View[2]/android.view.View/android.view.View[1]' });
+      const mapping = {
+        '0': 7,
+        '1': 8,
+        '2': 9,
+        '3': 10,
+        '4': 11,
+        '5': 12,
+        '6': 13,
+        '7': 14,
+        '8': 15,
+        '9': 16
+      };
+
+      for (let i = 0; i < code.length; i++) {
+        await driver.pressKeyCode(mapping[code[i]]); // 6
+        console.log("Đã nhập số: ", mapping[code[i]]);
+        await driver.pause(1000);
+      }
+
+
+    }
+
+  }
+
 }
 async function main({ cookie, email, password, newEmail }) {
 
@@ -360,8 +402,8 @@ async function main({ cookie, email, password, newEmail }) {
   await init({ driver, email, cookie });
   await driver.pause(5000);
 
-   await driver.pause(3000);
-   agree = await findButton({ driver, text: 'Profile' });
+  await driver.pause(3000);
+  agree = await findButton({ driver, text: 'Profile' });
   await driver.pause(3000);
   await findButton({ driver, text: '', xpath: '//android.widget.ImageView[@content-desc="Lock"]' });
   //tab giữa màn hình
