@@ -398,5 +398,118 @@ async function debugInspect(driver, selectorOrText, options = {}) {
 
   return elems;
 }
+  // Capture screenshot, send to OCR server and tap the returned coordinates (if found)
+  async function findTextOnScreenAndTap(driver, text, serverUrl = 'http://localhost:5000/find_text') {
+    try {
+      // takeScreenshot returns base64 string
+      const base64 = await driver.takeScreenshot();
 
+      // send to OCR server
+      const payload = { image: base64, text };
+
+      // Use fetch if available (Node 18+), otherwise require('node-fetch') if installed
+      let fetchFn = global.fetch;
+      if (!fetchFn) {
+        try {
+          // dynamic require in case node-fetch is installed
+          // eslint-disable-next-line global-require
+          fetchFn = require('node-fetch');
+        } catch (e) {
+          throw new Error('fetch is not available. Install node 18+ or add node-fetch.');
+        }
+      }
+
+      const res = await fetchFn(serverUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const json = await res.json();
+      if (!json || !json.found) {
+        console.log(`🔍 Text '${text}' not found on screen`);
+        return null;
+      }
+
+      const x = Math.round(json.x);
+      const y = Math.round(json.y);
+
+      console.log(`📍 Found '${text}' at (${x}, ${y}), tapping...`);
+
+      // perform tap using TouchAction
+      try {
+        await driver.touchAction({ action: 'tap', x, y });
+      } catch (e) {
+        // Some drivers expect an array of actions
+        try {
+          await driver.touchAction([{ action: 'tap', x, y }]);
+        } catch (err) {
+          console.warn('Failed to tap via touchAction:', err.message || err);
+        }
+      }
+
+      return { x, y };
+    } catch (err) {
+      console.error('Error in findTextOnScreenAndTap:', err.message || err);
+      return null;
+    }
+  }
+
+  // Capture screenshot, send a template image to OCR server for template-matching, and tap the returned coordinates
+  async function findImageOnScreenAndTap(driver, template, serverUrl = 'http://localhost:5000/find_image', threshold = 0.7) {
+    try {
+      // takeScreenshot returns base64 string (no data: prefix)
+      const base64 = await driver.takeScreenshot();
+
+      // Determine template base64: if 'template' looks like a file path, read and convert
+      let tplB64 = template;
+      if (typeof template === 'string' && template.startsWith('/')) {
+        const fs = require('fs');
+        const buf = fs.readFileSync(template);
+        tplB64 = buf.toString('base64');
+      }
+
+      const payload = { image: base64, template: tplB64, threshold };
+
+      let fetchFn = global.fetch;
+      if (!fetchFn) {
+        try {
+          fetchFn = require('node-fetch');
+        } catch (e) {
+          throw new Error('fetch is not available. Install node 18+ or add node-fetch.');
+        }
+      }
+
+      const res = await fetchFn(serverUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const json = await res.json();
+      if (!json || !json.found) {
+        console.log(`🔍 Template not found on screen (score=${json && json.score ? json.score : 'n/a'})`);
+        return null;
+      }
+
+      const x = Math.round(json.x);
+      const y = Math.round(json.y);
+      console.log(`📍 Found template at (${x}, ${y}), score=${json.score}, tapping...`);
+
+      try {
+        await driver.touchAction({ action: 'tap', x, y });
+      } catch (e) {
+        try {
+          await driver.touchAction([{ action: 'tap', x, y }]);
+        } catch (err) {
+          console.warn('Failed to tap via touchAction:', err.message || err);
+        }
+      }
+
+      return { x, y, score: json.score };
+    } catch (err) {
+      console.error('Error in findImageOnScreenAndTap:', err.message || err);
+      return null;
+    }
+  }
 main();
