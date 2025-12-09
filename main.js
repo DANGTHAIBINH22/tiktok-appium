@@ -310,6 +310,11 @@ async function main(options) {
       return await main({ ...options });
 
     }
+      if (texts.find(t => t.value.includes('ALLOW'))) {
+      await driver.pause(1000);
+      agree = await findButton({ driver, text: 'ALLOW' });
+      return await main({ ...options });
+    }
     if (texts.find(t => t.value.includes('Allow'))) {
       await driver.pause(1000);
       agree = await findButton({ driver, text: 'Allow' });
