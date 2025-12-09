@@ -140,7 +140,8 @@ async function main(options) {
         hostname: 'localhost',
         port: 4723,
         path: '/wd/hub',
-        logLevel: 'info',
+        logLevel: 'error',
+
         capabilities: caps
       });
 
@@ -170,11 +171,22 @@ async function main(options) {
     let agree
     await driver.pause(4000);
     let texts = await getAllTexts(driver);
+    if (texts.find(t => t.value.includes('Swipe up for more'))) {
+      let content = await findButton({ driver, text: 'Swipe up for more' });
+      if (content) {
+        let { x, y } = await content.getLocation();
+        console.log(`Swipe up for more tại tọa độ x=${x}, y=${y}`);
+        await swipe(driver, x, y, x, y - 300);
+        await driver.pause(3000);
+      }
+
+      return await main({ ...options });
+    }
     if (texts.find(t => t.value.includes('Profile'))) {
       await findButton({ driver, text: 'Profile' });
 
     }
-    if(texts.find(t => t.value.includes('Couldn’t sign you in'))){
+    if (texts.find(t => t.value.includes('Couldn’t sign you in'))) {
       console.log("Không thể đăng nhập bằng tài khoản này, chuyển sang tài khoản khác");
       return false
     }
@@ -211,7 +223,7 @@ async function main(options) {
     }
 
 
-    if (texts.find(t => t.value.toLowerCase().includes('email or phone')) ||  texts.find(t => t.value.toLowerCase().includes("forgot email"))) {
+    if (texts.find(t => t.value.toLowerCase().includes('email or phone')) || texts.find(t => t.value.toLowerCase().includes("forgot email"))) {
 
       agree = await findButton({ driver, text: 'Email or phone' });
       agree = await findButton({ driver, xpath: '//android.widget.EditText[@resource-id="identifierId"]' });
@@ -256,7 +268,7 @@ async function main(options) {
       if (content) {
         let { x, y } = await content.getLocation();
         console.log(`Nút Back up device data tại tọa độ x=${x}, y=${y}`);
-        await swipe(driver, x, y, x, y - 200);
+        await swipe(driver, x, y, x, y - 300);
         await driver.pause(5000);
       }
 
@@ -310,7 +322,7 @@ async function main(options) {
       return await main({ ...options });
 
     }
-      if (texts.find(t => t.value.includes('ALLOW'))) {
+    if (texts.find(t => t.value.includes('ALLOW'))) {
       await driver.pause(1000);
       agree = await findButton({ driver, text: 'ALLOW' });
       return await main({ ...options });
@@ -327,17 +339,7 @@ async function main(options) {
       return await main({ ...options });
     }
 
-    if (texts.find(t => t.value.includes('Swipe up for more'))) {
-      let content = await findButton({ driver, text: 'Swipe up for more' });
-      if (content) {
-        let { x, y } = await content.getLocation();
-        console.log(`Swipe up for more tại tọa độ x=${x}, y=${y}`);
-        await swipe(driver, x, y, x, y - 200);
-        await driver.pause(3000);
-      }
 
-      return await main({ ...options });
-    }
 
     if (texts.find(t => t.value.includes('Lock')) && texts.find(t => t.value.includes("Profile menu"))) {
       await driver.pause(3000);
@@ -458,19 +460,32 @@ async function findButton({ driver, text, index = 0, xpath, isClick = true }) {
   for (const selector of selectors) {
     try {
       const elems = await driver.$$(selector);
-      if (elems.length === 0) continue;
-
-      // Lọc ra những element hiển thị được
-      for (const el of elems) {
+      if (elems.length === 0 ) continue;
+       async function getPro(e){
         try {
-          if (await el.isDisplayed()) matchedElements.push(el);
-        } catch {
-          // ignore stale element
+          return await e.isDisplayed()? e: false
+        } catch (e) {
+          console.log("Lỗi get property: ", e.message);
+          return false
         }
       }
+            let promises = []
+
+      for(const e of elems){
+        promises.push( getPro(e))
+      }
+      const results = await Promise.allSettled( promises);
+
+
+      results.forEach((r) => {
+        if (r.value) {
+          matchedElements.push(r.value);   // element
+        }
+      });
 
       if (matchedElements.length > 0) break;
-    } catch {
+    } catch (e) {
+      console.warn(`⚠️ Lỗi khi tìm selector "${selector}":`, e.message);
       // bỏ qua lỗi selector
     }
   }
@@ -507,4 +522,4 @@ async function findButton({ driver, text, index = 0, xpath, isClick = true }) {
 
 
 
-main({ email: 'leilahballz7c45@ghatkhalihs.us', password: 'Phat3479', new_password: "Thaibinha3@123456", cookie: 'COMPASS=gmail_ps=Cp4BAAlriVeDOvs7TaiJLRLCHJmxlfHvGe6ExLJ_aa9t65sJfAqajmq6BcodDut3x3IgzF0ADseAZQprZ4KVXEYvz9klo1g3QspM6QEtAtcgKYP6YtgNhd_IUQYGowlMiG2Rm-xdO84REEJr5juM-bSoy4OywMLLM1PvzgMTYsFCqnl_r7j0FGnFPPwFH6bZR2p9ihKs3BMIcu_Vyh-DY_IQs9jfyQYa1wEACWuJVwf6BB74BcPfrW-w3g0c0rOXY1-gX6CctkQt3sntH80ls3QcDCCiOjESA6HA9320HKTw9eArovQIk_HKWOrywwPrqIlzMv9X6BZPINLXGwmzK8bBOt-5fVze1iVSngj9ImP7hKTsDWWBH-JeTb3COlM1obnGdvKy6lps6MsVpiW6PvY2sUAAAUj-Dhe2fAKl6WqGZd5bCEio-AmtBkMxdXQtjXOtNrC4VXmuve6MROfrTA7ZBE429rG3DRZARgjVbdTqPtDht2yISLfPZey-bMGgIjAB:gmail=CsIBAAlriVfWb6i9KxyUWDwKZqN6KaS_vFjw5M_41Fwyr8Y6ptpGCSE408OO5kyrDiczP4iOiib9tMvMP12YdWbHi7eiZTSZlxM4Xr5qZo3cS6bYov8wAf87fq3_7ePma76PVI-ebrT_AoPKN5sbbdi-6q-abPGUhH45hinYyMRQRes84WVv1poe48eyZNWYRPilMiQ21n8xWcTDCEehpSRXzYIOCI4L0HAnFQ2ntmCYtsNAtfE-suIVlxjqsJcnIvYabksQq-PfyQYa-wEACWuJV5B7fOLJLnrOXaFsw6qczRIn3jjr0QHgXq7nAwA0ON45pR-dVLSpItvWSiVPyAf3kCW6ZmJgnT1y0FwPbhnPZYpB-UgXxr_QChJYaG2rLT0MdZAu7fYSU6HSVk5JepQY34iaycFa_svSs_8h8qDJD759TJ21uWLA9P0VbNYbQFRdnsI4r3v6SaqUlRYOFRq9nEZnFhsIcJUBiprCrQPLql-0QA878kXzKGK4LIMzG2t3tcKPumt9VeGPKy367Mz487eQM9Q0xKQl8JCd0yMPINQQCl-_0c5EQihRDv0oWSYhYSWIgCTeJXeQNnvqITbPOAC80RKi3TAB; SID=g.a0004QjgwTYTXM-bFyg3UuETax1gPmA5feCP_x482fTeYfSMBrZe_FiNaI-Twpep2hMtcnqYNAACgYKAUsSARISFQHGX2MiaxrGP3M0TkhVAockmDMLehoVAUF8yKrc6cpIPJbgtRSmQKRw5K-z0076; __Secure-1PSID=g.a0004QjgwTYTXM-bFyg3UuETax1gPmA5feCP_x482fTeYfSMBrZe6kJ0IEotXcnS8H1xrXVHLQACgYKATcSARISFQHGX2Mit33Be7CQS25k4YdBgPmX6RoVAUF8yKoUWwfUd1har1qfy5Ryoi_f0076; __Secure-3PSID=g.a0004QjgwTYTXM-bFyg3UuETax1gPmA5feCP_x482fTeYfSMBrZe3ShSbfGkkK_KkC5FM9pgfgACgYKAeQSARISFQHGX2Mi7YBxaQ0ZgloSCOR7ZYBuJRoVAUF8yKp6-ZjUEUohd2jWsBmPsFip0076; HSID=ACfKVJw2xvSkmDQY0; SSID=AUbPS_xqsSYMNT5md; APISID=rEsFFTXsmBXb16Vb/AKBrfeMNiDvrZynai; SAPISID=jV6lP6B-kBg3Ly3l/AvOGIjQg-cFFMNqxI; __Secure-1PAPISID=jV6lP6B-kBg3Ly3l/AvOGIjQg-cFFMNqxI; __Secure-3PAPISID=jV6lP6B-kBg3Ly3l/AvOGIjQg-cFFMNqxI; OSID=g.a0004QjgwTP5uqxsEfVVPY7IcvLVPr39jxWhl3sQEOhoWYoWMrGvnzg_-dwjNtQKip1t59nAdwACgYKAaYSARISFQHGX2Mibc76uO15ueUWOkC54zQCHxoVAUF8yKo-wawbXdZgUB_k8kZudL5n0076; __Secure-OSID=g.a0004QjgwTP5uqxsEfVVPY7IcvLVPr39jxWhl3sQEOhoWYoWMrGvX83Lx9KMPJpu8evUfQirCAACgYKAWMSARISFQHGX2Miq9zWR0W0aRzDIq6IXwY07RoVAUF8yKrWcG9oV0bUIAWWiC_Jd_Zz0076; __Host-GMAIL_SCH_GMN=1; __Host-GMAIL_SCH_GMS=1; __Host-GMAIL_SCH_GML=1; NID=527=cS93riXuft3aQWH975osiFgRiY3sqVWmqlthWm-NhEqknbY4n8rtFICxR-490AwDQlrFH1cJaqzVnKJ7EmnJaYpzr4yenJdmC1tCnKOOa8W0dqCbVfeHqqt0b--QB2hOu9aQ1hrUqoAjx1qT-c6oATaURKU-P-_Sv_HSAG0j4vX2Ozx5vF5KaIVpaiDGz5uCMXJg-W4iYNemXwLoPMIBr6CEIpjv1lVbbb6v98ob3BxBW1UZp8y5vdUmkLrK5sBRZNo36a0xhoc8qMtSTBu27LbUn60CgFMU7nrK-jq8uOe4XyxcpZYX_X0atTjqATrMFy8CfvHHOKGxyV337t-iAj_3X_Ris1jQIX5ZtwMhznUGS22acy-6Re8rarJt5YtDeSCwy5n7xRj5F_GuLQBiANmRrGl5yOwjaTjSWv2ZrHQrkXCgHvnudsaL4NxBBlWtbcIjvxGxi602q0mwzRIK8PkCm8vceYWxWJEkZipWWYqR7g69snq92CUSNsF4rgJSBTJl9stsUfhrT3502njPTXw607yCtlORgdAhCvA-zzh8UehalFT7AeGEJssxByWP--gBnkrehHmgI6bptneZsNVDmJm7vJ7Hi_hZS1YIZ0uWvJ8ip14luQGjwzm8sLbfAoY1BFUEaOHwd5yEXAwWxmEgyw; __Secure-1PSIDTS=sidts-CjIBflaCdaTqLy31lzkg19YdMFAGLPUgC9PNgxewnPO5Eo100HU9d5xZmn1y3eLS39_k_xAA; __Secure-3PSIDTS=sidts-CjIBflaCdaTqLy31lzkg19YdMFAGLPUgC9PNgxewnPO5Eo100HU9d5xZmn1y3eLS39_k_xAA; SIDCC=AKEyXzU8j0uv_JhgSfLLfAVnAz8flkVFHFCbrO-tsu3X1Oi9wlCSHH6unebS2GpbkT4EuQZGQQ; __Secure-1PSIDCC=AKEyXzUD_4gM1tMXertezBJTqaVWuaSzsG_b757hGz6HGjIcdKVM4L_kvDQjaZxgJg0hx0J2; __Secure-3PSIDCC=AKEyXzU4devxaRvlZwJpP_vS7BQPXntjyGSksk-51CkX7vwJI_RBaRtnKGFykJhmRa_pe8tyaQ' });
+main({ email: 'staciahoffmandkq6g@ghatkhalischool.us', password: 'Phat3479', new_password: "Thaibinha3@123456", cookie: 'COMPASS=gmail_ps=CrMBAAlriVexwbkqVgHkK8xGaSm0Cjk7fc5-_vB1ZHxfH83W2Zz1XAOyusHEPW8l_a-ZXUVwsmORGVvY3sqPh3ZRObsZ1FFGD3Op40gJFvKfFv8Wy1v0uFt5l1v6ZziLkAZS2JZKI1Aha_K0BY8JfUweCc6NjOH5-fpavfdgjHL1BW7qpsoWS1FA2DKESrPl8oLr5kgJxEfS2dzsNb3-6531iifMsyujxwZlXRPVU6AYzNxyxlwQs7jlyQYa7AEACWuJVyPpb8RNaQXEzdFFjlZPajojVAji7Aj3MaZQZBVyT_uIS8MZxrs3RoHVPXrMdhbAXutkeqkm6q3bhojIntkEXOUIBwKowuQpomeuboLgd5tUyUK66CCRJCETo6KjAu7dA81qGq6P1qdts_WwW_9_Fszfw2pNFmHaMyVKRxPbzTGarNk9DN8G9bp_8L8rRsKH1S2SMez_RbqcZDBa6HPSgg7RjkeEsBPGgou3_P5-WIQX1aLgLpPNzewrII2a0LAmM73Er20qSbPKeI4VIhi19Ile986vXBwLw14-QFmZTGTXtqZ3oOS3PzAB:gmail=CsIBAAlriVeP-BDgSMoZg9w4qhy6kXV0qY1SUZH4SQ_sD1Acr9kf0dzi-tN67CaOGKXstztnvnH9me9sPe6LqCpZFJ2qMCwOMs0eFkYJJlr7woAnozS4l5FSbPXKlCN8xxoX55AjgKApaFk0Zw3rpy7Y1y1k2ucbn13Caa3_jTwy-VkFjpWv683rdthXFqDaLGI8EGDfHxKKbwEK2DfyHnrToeohGUBLW8yqY9gfJjYQVW-YXAA7z6-c3EuYXucgH6l-m04Qhb3lyQYa-wEACWuJV9um1nYPsO8jktr17zV_Jk69whgDcbMOTXcRS5oGHs4hOT6lTerHmS1AmMwKsJOGhDK_1hZJxCAMmlN4rAdSwFsJqFaYNeT7dW4_1Q31OWd1eyI0Ima7lhxF7Z9cx8FWEuVfCBsnPEnG9cedAVMx9nBjmL4z-MeMtfVc7s-tb0tPwVmuMrWt09grUcn-LKDjhEr07_thYszPlD1zAYiDDv3GyzCJIKySg4251Geh-VrlKbmyoQHGoJi7xtD03w5qzN-6DkTmVP1U0q51F5k4MlKGRL0O-KTt0rVvM7yHAW4nya_CKpOza_OoPiwVALPi-7bgDpo5UTAB; SID=g.a0004Qiw--iACjwJ3_2Xu38p97GHZJ1wHR6t4rp-ooD5ONpnNzQqZl2dcQQlcqRgz23cbMhAQAACgYKARcSARYSFQHGX2MikzT2DiDezHKoXJNE0kA5cxoVAUF8yKqKKv-lyYa4-uTGSxrGx6rP0076; __Secure-1PSID=g.a0004Qiw--iACjwJ3_2Xu38p97GHZJ1wHR6t4rp-ooD5ONpnNzQqhCK8GRqJ7KBhsQU6kmObWAACgYKAc0SARYSFQHGX2Mi3tYswIcOrWq8aowmKbG5FxoVAUF8yKpdtwrJx_IpNr-AxxA3cUpq0076; __Secure-3PSID=g.a0004Qiw--iACjwJ3_2Xu38p97GHZJ1wHR6t4rp-ooD5ONpnNzQqS46KrXztv6N-jCjdiqbXfAACgYKAQYSARYSFQHGX2MiUvoIfdJ8D2KOFWdyy-ew9xoVAUF8yKoJKzJv1NdNcPsX-l6oKkfJ0076; HSID=AdfJSCtylc60jb9c5; SSID=AkTZxx10A2sFtZyoA; APISID=QJYMDX3Q-Z43Qf-c/Agh8UM68ney5MIXY1; SAPISID=fjxHOWyX6mwISf79/AdPJQXmfpJZ20S0tD; __Secure-1PAPISID=fjxHOWyX6mwISf79/AdPJQXmfpJZ20S0tD; __Secure-3PAPISID=fjxHOWyX6mwISf79/AdPJQXmfpJZ20S0tD; OSID=g.a0004Qiw-_aEnS4vfgS1N15qTHsx0feWlaMRYkCnHVfydVUTdi3G_L2S2XcdMn834-OqB6wuAgACgYKASYSARYSFQHGX2MibjbpqBClrZqbF_T4QM9eVxoVAUF8yKpV5m3GSGFyDhk3QogNhz4I0076; __Secure-OSID=g.a0004Qiw-_aEnS4vfgS1N15qTHsx0feWlaMRYkCnHVfydVUTdi3GTsYNUxTUfvHcBsdXVm_mLAACgYKAWISARYSFQHGX2MiVJDk4yzEav4fhZFP6uFEfhoVAUF8yKr9vprPEQkLwWOURmZPYCTc0076; __Host-GMAIL_SCH_GMN=1; __Host-GMAIL_SCH_GMS=1; __Host-GMAIL_SCH_GML=1; NID=527=LFWgL9jZLv4Q2uhxL5NpDzUbvFM4x8XVmxL68-u6fsXmh2udzmbhoBXwXlE-6csGGm96UvD31sdlAAI8WZKEfDG5hiyH1PInGfOakLHaGinczqhUcVDtvcpZKkYl5nAtUHTcaG0CI2KefySGWlM5O3INpmI0DPiJSlyUBY3Tcfs41X9iw9AFW_qlrxNDxrz8QnXBcjUQTmgD1aeDsN2rYiiXQFAoal3za_7upbgGMQxb9nktE1l1dxMU0BRBoBYhjNNp8K4hLPQs0dLZgg; SIDCC=AKEyXzWRnhMMPuqRL2W357lxki1A7gh5JovyV02IFozOXdIeBUXyrauUjZ6dGZdbCu__BvZ4; __Secure-1PSIDCC=AKEyXzUmQIjBWuPPYP1d6IcY8Txtw7J6J0qbW8I-1dH5-0czV8yGPGedRe1TzrkKs_UBYV7N; __Secure-3PSIDCC=AKEyXzVpd7OLutfnk3f_RPaopBRwyKbEw7L0CvgutODc3RbjRwlra1ERDwJxy9Vez4wbJ6aR' });
