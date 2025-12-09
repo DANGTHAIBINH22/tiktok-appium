@@ -174,6 +174,10 @@ async function main(options) {
       await findButton({ driver, text: 'Profile' });
 
     }
+    if(texts.indexOf(t => t.value.includes('Couldn’t sign you in'))){
+      console.log("Không thể đăng nhập bằng tài khoản này, chuyển sang tài khoản khác");
+      return false
+    }
     await driver.pause(3000);
     if (texts.find(t => t.value.includes('Sign in with Google'))) {
       let content = await findButton({ driver, text: 'Sign in with Google' });
