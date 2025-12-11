@@ -32,7 +32,6 @@ curl -X POST http://127.0.0.1:4723/wd/hub/session \
 
 
 
-appium server -p 4723 --log-level debug --allow-cors    --base-path /wd/hub --address 127.0.0.1 --allow-insecure=chromedriver_autodownload
 
 appium server \
   -p 4723 \
@@ -43,15 +42,12 @@ appium server \
   --allow-insecure="*:chromedriver_autodownload"
 
 
-  ANDROID_HOME=$HOME/Library/Android/sdk appium server \
-  -p 4723 \
-  --log-level debug \
-  --allow-cors \
-  --base-path /wd/hub \
-  --address 127.0.0.1 \
-  --allow-insecure="*:chromedriver_autodownload"
+  ANDROID_HOME=$HOME/Library/Android/sdk appium server   -p 4723   --log-level debug   --allow-cors   --base-path /wd/hub   --address 127.0.0.1   --allow-insecure="*:chromedriver_autodownload"
 
 
+
+appium server   -p 4723   --log-level debug   --allow-cors   --address 127.0.0.1   --allow-insecure="*:chromedriver_autodownload" --use-drivers=uiautomator2
 appium driver install xcuitest
+appium server --port 4723 --log-level debug --address 127.0.0.1 --use-drivers=uiautomator2
 
 4️⃣ Tích chọn "Show this iPhone when on Wi-Fi"
