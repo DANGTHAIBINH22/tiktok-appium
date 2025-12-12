@@ -149,6 +149,10 @@ async function main(options) {
 
       // Chờ load giao diện chính
       await driver.pause(5000);
+      await driver.execute('mobile: deepLink', {
+        url: "musically://login",
+        package: "com.zhiliaoapp.musically"
+      });
       options.is_launched = true;
       console.log('🚀 Bắt đầu phiên làm việc với Appium...');
 
@@ -234,6 +238,8 @@ async function main(options) {
       await driver.sendKeys(Array.from(email));
       await driver.pause(1000);
       agree = await findButton({ driver, text: 'NEXT' });
+      agree = await findButton({ driver, text: 'Next' });
+
       return await main({ ...options });
     }
     if (texts.find(t => t.value.includes('Enter your password')) && texts.find(t => t.value.includes("Show password"))) {
@@ -244,6 +250,8 @@ async function main(options) {
       await driver.pause(5000);
 
       agree = await findButton({ driver, text: 'NEXT' });
+            agree = await findButton({ driver, text: 'Next' });
+
       return await main({ ...options });
     }
     if (texts.find(t => t.value.includes('Save password to Google Password Manager?'))) {
@@ -251,8 +259,8 @@ async function main(options) {
       await driver.pause(3000);
       return await main({ ...options });
     }
-    
-     if (texts.find(t => t.value.includes('Agree and continue'))) {
+
+    if (texts.find(t => t.value.includes('Agree and continue'))) {
       agree = await findButton({ driver, text: 'Agree and continue' });
       await driver.pause(3000);
       return await main({ ...options });
@@ -292,6 +300,12 @@ async function main(options) {
 
       await driver.pause(1000);
       agree = await findButton({ driver, text: 'I UNDERSTAND' });
+      return await main({ ...options });
+    }
+        if (texts.find(t => t.value.includes('Next'))) {
+
+      await driver.pause(1000);
+      agree = await findButton({ driver, text: 'Next' });
       return await main({ ...options });
     }
     if (texts.find(t => t.value.includes('NEXT'))) {
