@@ -337,8 +337,14 @@ async function main(options) {
       agree = await findButton({ driver, text: 'Skip' });
       return await main({ ...options });
     }
+    if (texts.find(t => t.value.includes("Start watching"))) {
 
- if (texts.find(t => t.value.includes("Profile menu")) && texts.find(t => t.value.includes('Sign up'))) {
+      await findButton({ driver, text: '', text: 'Start watching' });
+      await driver.pause(1000);
+      return await main({ ...options });
+    }
+
+    if (texts.find(t => t.value.includes("Profile menu")) && texts.find(t => t.value.includes('Sign up'))) {
       console.log("Có sign up, nghĩa là chưa đăng nhập được");
       await driver.pause(1000);
       await findButton({ driver, text: '', text: 'Sign up' });
@@ -464,21 +470,21 @@ async function findButton({ driver, text, index = 0, xpath, isClick = true }) {
   for (const selector of selectors) {
     try {
       const elems = await driver.$$(selector);
-      if (elems.length === 0 ) continue;
-       async function getPro(e){
+      if (elems.length === 0) continue;
+      async function getPro(e) {
         try {
-          return await e.isDisplayed()? e: false
+          return await e.isDisplayed() ? e : false
         } catch (e) {
           console.log("Lỗi get property: ", e.message);
           return false
         }
       }
-            let promises = []
+      let promises = []
 
-      for(const e of elems){
-        promises.push( getPro(e))
+      for (const e of elems) {
+        promises.push(getPro(e))
       }
-      const results = await Promise.allSettled( promises);
+      const results = await Promise.allSettled(promises);
 
 
       results.forEach((r) => {
