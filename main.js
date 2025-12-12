@@ -291,7 +291,7 @@ async function main(options) {
       if (content) {
         let { x, y } = await content.getLocation();
         console.log(`Nút Back up device data tại tọa độ x=${x}, y=${y}`);
-        await swipe(driver, x, y, x, y - 400);
+        await swipe(driver, x, y, x, y - 1000);
         await driver.pause(5000);
       }
 
