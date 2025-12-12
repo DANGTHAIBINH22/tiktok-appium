@@ -126,7 +126,7 @@ async function main(options) {
     if (!is_launched) {
       const caps = {
         platformName: 'Android',
-        'appium:deviceName': 'emulator-5556', // đổi theo tên adb devices
+        'appium:deviceName': 'emulator-5554', // đổi theo tên adb devices
         'appium:platformVersion': '16',        // Android version
         'appium:automationName': 'UiAutomator2',
         'appium:appPackage': 'com.zhiliaoapp.musically',
@@ -422,6 +422,7 @@ async function main(options) {
 
     }
     await driver.pause(3000);
+    console.log("Chưa xử lý được, thử lại...", texts.map(t => t.value).slice(0, 20));
     return main({ ...options });
   } catch (err) {
 
