@@ -276,13 +276,16 @@ async function main(options) {
       return await main({ ...options });
     }
 
-    if (texts.find(t => t.value.includes('Back up device data'))) {
+    if (texts.find(t => t.value.includes('Back up device data') || t.value.includes('Use basic device backup'))) {
 
 
 
       await driver.pause(3000);
       let content = await findButton({ driver, text: 'Back up device data' });
-      await driver.pause(5000);
+      if (!content) {
+        content = await findButton({ driver, text: 'Use basic device backup' });
+      }
+      await driver.pause(1000);
 
       if (content) {
         let { x, y } = await content.getLocation();
@@ -292,8 +295,8 @@ async function main(options) {
       }
 
       agree = await findButton({ driver, text: 'ACCEPT' });
-      return await main({ ...options });
     }
+       return await main({ ...options });
 
     if (texts.find(t => t.value.includes('ACCEPT'))) {
 
