@@ -174,6 +174,7 @@ async function main(options) {
     let agree
     await driver.pause(1000);
     let texts = await getAllTexts(driver);
+    forEach((t, i) => {[["hint", "text", "content-desc", "resource-id"].includes(t.type)]? console.log("Text found: ", t.value):null});
     if (texts.find(t => t.value.includes('Swipe up for more'))) {
       let content = await findButton({ driver, text: 'Swipe up for more' });
       if (content) {
@@ -226,9 +227,9 @@ async function main(options) {
       return await main({ ...options });
 
     }
-    if(texts.find(t => t.value.includes('Sign up for TikTok')) && texts.find(t => t.value.includes('Log in'))){ 
+    if(texts.find(t => t.value.includes('Sign up for TikTok')) && texts.find(t => t.value.includes('Already have an account? Log in'))){ 
 
-      agree = await findButton({ driver, text: 'Log in' });
+      agree = await findButton({ driver, text: 'Already have an account? Log in' });
       return await main({ ...options });
     }
 
