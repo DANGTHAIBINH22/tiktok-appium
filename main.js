@@ -189,6 +189,8 @@ async function main(options) {
       console.log("Không thể đăng nhập bằng tài khoản này, chuyển sang tài khoản khác");
       return false
     }
+
+
     await driver.pause(3000);
     if (texts.find(t => t.value.includes('Sign in with Google'))) {
       let content = await findButton({ driver, text: 'Sign in with Google' });
@@ -249,7 +251,12 @@ async function main(options) {
       await driver.pause(3000);
       return await main({ ...options });
     }
-
+    
+     if (texts.find(t => t.value.includes('Agree and continue'))) {
+      agree = await findButton({ driver, text: 'Agree and continue' });
+      await driver.pause(3000);
+      return await main({ ...options });
+    }
     if (texts.find(t => t.value.includes('I agree'))) {
       agree = await findButton({ driver, text: 'I agree' });
       await driver.pause(3000);
