@@ -2,7 +2,6 @@ import { remote } from 'webdriverio';
 import { getEmailTempIOExist, getMessageTempIO, getTiktokCodeTempIO, getCodeTiktok, getEmailTempIO, updateAccountToServer, delay } from "./helper.js"
 
 import xml2js from 'xml2js';
-import { text } from 'wd/lib/commands.js';
 
 async function getAllTexts(driver) {
   const source = await driver.getPageSource();
