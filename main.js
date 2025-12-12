@@ -296,8 +296,9 @@ async function main(options) {
       }
 
       agree = await findButton({ driver, text: 'ACCEPT' });
+             return await main({ ...options });
+
     }
-       return await main({ ...options });
 
     if (texts.find(t => t.value.includes('ACCEPT'))) {
 
