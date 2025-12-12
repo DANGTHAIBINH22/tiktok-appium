@@ -2,6 +2,7 @@ import { remote } from 'webdriverio';
 import { getEmailTempIOExist, getMessageTempIO, getTiktokCodeTempIO, getCodeTiktok, getEmailTempIO, updateAccountToServer, delay } from "./helper.js"
 
 import xml2js from 'xml2js';
+import { text } from 'wd/lib/commands.js';
 
 async function getAllTexts(driver) {
   const source = await driver.getPageSource();
@@ -226,8 +227,13 @@ async function main(options) {
       return await main({ ...options });
 
     }
+    if(texts.find(t => t.value.includes('Sign up for TikTok')) && texts.find(t => t.value.includes('Log in'))){ 
 
+      agree = await findButton({ driver, text: 'Log in' });
+      return await main({ ...options });
+    }
 
+  
     if (texts.find(t => t.value.toLowerCase().includes('email or phone')) || texts.find(t => t.value.toLowerCase().includes("forgot email"))) {
 
       agree = await findButton({ driver, text: 'Email or phone' });
