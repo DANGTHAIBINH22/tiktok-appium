@@ -174,7 +174,7 @@ async function main(options) {
     let agree
     await driver.pause(1000);
     let texts = await getAllTexts(driver);
-    forEach((t, i) => {[["hint", "text", "content-desc", "resource-id"].includes(t.type)]? console.log("Text found: ", t.value):null});
+    texts.forEach((t, i) => {[["hint", "text", "content-desc", "resource-id"].includes(t.type)]? console.log("Text found: ", t.value):null});
     if (texts.find(t => t.value.includes('Swipe up for more'))) {
       let content = await findButton({ driver, text: 'Swipe up for more' });
       if (content) {
