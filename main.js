@@ -183,7 +183,7 @@ async function main(options) {
     }
     if (texts.find(t => t.value.includes('Profile'))) {
       await findButton({ driver, text: 'Profile' });
-
+      await delay(1000);
     }
     if (texts.find(t => t.value.includes('Couldn’t sign you in'))) {
       console.log("Không thể đăng nhập bằng tài khoản này, chuyển sang tài khoản khác");
@@ -338,7 +338,12 @@ async function main(options) {
       return await main({ ...options });
     }
 
-
+ if (texts.find(t => t.value.includes("Profile menu")) && texts.find(t => t.value.includes('Sign up'))) {
+      console.log("Có sign up, nghĩa là chưa đăng nhập được");
+      await driver.pause(1000);
+      await findButton({ driver, text: '', text: 'Sign up' });
+      return await main({ ...options });
+    }
 
     if (texts.find(t => t.value.includes('Lock')) && texts.find(t => t.value.includes("Profile menu"))) {
       await driver.pause(3000);
