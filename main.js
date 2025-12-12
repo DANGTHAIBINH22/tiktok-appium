@@ -351,7 +351,7 @@ async function main(options) {
       return await main({ ...options });
     }
 
-    if (texts.find(t => t.value.includes("Profile menu")) && texts.find(t => t.value.includes('Sign up'))) {
+    if (texts.find(t => t.value.includes("Profile")) && texts.find(t => t.value.includes('Sign up'))) {
       console.log("Có sign up, nghĩa là chưa đăng nhập được");
       await driver.pause(1000);
       await findButton({ driver, text: '', text: 'Sign up' });
