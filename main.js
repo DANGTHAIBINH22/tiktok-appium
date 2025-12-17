@@ -123,6 +123,7 @@ async function vefifyCodeEmail({ driver, cookie, options }) {
 async function main(options) {
   let { email, password, cookie, newEmail, is_launched, new_password, driver } = options;
   try {
+
     if (!is_launched) {
       const caps = {
         platformName: 'Android',
@@ -134,7 +135,7 @@ async function main(options) {
         'appium:noReset': false,                // không reset app
         'appium:newCommandTimeout': 3000
       };
-
+      console.log('🚀 Khởi tạo phiên làm việc với Appium...');
       const driver = await remote({
         hostname: 'localhost',
         port: 4723,
