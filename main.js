@@ -420,6 +420,7 @@ async function main(options) {
       if (texts.find(t => t.value.includes('Enter password')) && texts.find(t => t.value.includes('Create password'))) {
 
         agree = await findButton({ driver, text: 'Password', index: 1 });
+         agree = await findButton({ driver, text: 'Enter password' });
         await driver.pause(3000);
         await driver.sendKeys(Array.from(new_password));
 
